@@ -56,11 +56,11 @@ type Process struct {
 }
 
 type RetryConfig struct {
-	Enabled           bool    `yaml:"enabled"`
-	MaxAttempts       int     `yaml:"max_attempts"`
+	Enabled           bool     `yaml:"enabled"`
+	MaxAttempts       int      `yaml:"max_attempts"`
 	InitialBackoff    Duration `yaml:"initial_backoff"`
 	MaxBackoff        Duration `yaml:"max_backoff"`
-	BackoffMultiplier float64 `yaml:"backoff_multiplier"`
+	BackoffMultiplier float64  `yaml:"backoff_multiplier"`
 }
 
 func DefaultRetryConfig() RetryConfig {

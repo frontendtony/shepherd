@@ -23,6 +23,16 @@ type stateEventMsg process.StateEvent
 type tickMsg time.Time
 type errMsg struct{ error }
 
+// ConfigReloadMsg is sent when config is reloaded via SIGHUP.
+type ConfigReloadMsg struct {
+	Config *config.Config
+}
+
+// NotifyMsg is sent to display a temporary notification in the status bar.
+type NotifyMsg struct {
+	Text string
+}
+
 // Model is the main Bubble Tea model for the shepherd TUI.
 type Model struct {
 	manager *process.ProcessManager
@@ -42,9 +52,12 @@ type Model struct {
 	confirmStopAll bool
 	width, height  int
 
-	autoStart string
-	err       error
-	ready     bool
+	autoStart    string
+	err          error
+	errSetAt     time.Time
+	notification string
+	notifyUntil  time.Time
+	ready        bool
 }
 
 // NewModel creates the TUI model wired to the given process manager.

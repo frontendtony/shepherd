@@ -69,6 +69,10 @@ group, or process name to auto-start it on launch.`,
 			cancel()
 		}()
 
+		// Placeholder for SIGHUP handler (wired after Program is created).
+		sigHup := make(chan os.Signal, 1)
+		signal.Notify(sigHup, syscall.SIGHUP)
+
 		mgr, err := process.NewProcessManager(ctx, cfg)
 		if err != nil {
 			return fmt.Errorf("creating process manager: %w", err)
@@ -82,6 +86,23 @@ group, or process name to auto-start it on launch.`,
 
 		model := tui.NewModel(mgr, cfg, autoStart)
 		p := tea.NewProgram(model, tea.WithAltScreen())
+
+		// SIGHUP: reload config and notify TUI.
+		go func() {
+			for range sigHup {
+				newCfg, err := config.Load(cfgPath)
+				if err != nil {
+					p.Send(tui.NotifyMsg{Text: fmt.Sprintf("Config reload failed: %s", err)})
+					continue
+				}
+				if err := config.Validate(newCfg); err != nil {
+					p.Send(tui.NotifyMsg{Text: fmt.Sprintf("Config invalid: %s", err)})
+					continue
+				}
+				p.Send(tui.ConfigReloadMsg{Config: newCfg})
+			}
+		}()
+
 		if _, err := p.Run(); err != nil {
 			return fmt.Errorf("running TUI: %w", err)
 		}

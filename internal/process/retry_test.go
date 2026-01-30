@@ -69,7 +69,7 @@ func TestNextBackoff_Jitter(t *testing.T) {
 
 func TestShouldRetry_Disabled(t *testing.T) {
 	cfg := config.RetryConfig{
-		Enabled:    false,
+		Enabled:     false,
 		MaxAttempts: 5,
 	}
 

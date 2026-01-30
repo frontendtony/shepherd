@@ -29,6 +29,14 @@ func (m Model) renderStatusBar() string {
 			Render(fmt.Sprintf(" Error: %s", m.err.Error()))
 	}
 
+	if m.notification != "" {
+		return style.Copy().
+			Background(lipgloss.Color("#2ECC71")).
+			Foreground(lipgloss.Color("#000000")).
+			Width(m.width).
+			Render(fmt.Sprintf(" %s", m.notification))
+	}
+
 	running := m.countByStatus(process.StatusRunning)
 	total := len(m.states)
 	left := fmt.Sprintf(" %d/%d running", running, total)

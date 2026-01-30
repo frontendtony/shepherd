@@ -1,6 +1,8 @@
 package tui
 
 import (
+	"time"
+
 	"github.com/charmbracelet/bubbles/key"
 	"github.com/charmbracelet/bubbles/viewport"
 	tea "github.com/charmbracelet/bubbletea"
@@ -32,10 +34,34 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 	case tickMsg:
 		m.refreshStates()
 		m.updateLogContent()
+		// Auto-clear error after 5 seconds.
+		if m.err != nil && !m.errSetAt.IsZero() && time.Since(m.errSetAt) > 5*time.Second {
+			m.err = nil
+		}
+		// Auto-clear notification.
+		if m.notification != "" && time.Now().After(m.notifyUntil) {
+			m.notification = ""
+		}
 		cmds = append(cmds, tickEvery())
 
 	case errMsg:
 		m.err = msg.error
+		m.errSetAt = time.Now()
+
+	case ConfigReloadMsg:
+		m.config = msg.Config
+		m.groups = nil
+		m.buildGroups()
+		m.rebuildItems()
+		if m.selectedIdx >= len(m.items) {
+			m.selectedIdx = 0
+		}
+		m.notification = "Config reloaded"
+		m.notifyUntil = time.Now().Add(3 * time.Second)
+
+	case NotifyMsg:
+		m.notification = msg.Text
+		m.notifyUntil = time.Now().Add(3 * time.Second)
 
 	case tea.KeyMsg:
 		cmd := m.handleKey(msg)
