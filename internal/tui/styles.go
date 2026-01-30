@@ -15,7 +15,7 @@ var (
 	colorStopped  = lipgloss.AdaptiveColor{Light: "#7F8C8D", Dark: "#7F8C8D"}
 	colorStarting = lipgloss.AdaptiveColor{Light: "#3498DB", Dark: "#3498DB"}
 
-	colorAccent = lipgloss.AdaptiveColor{Light: "#7D56F4", Dark: "#7D56F4"}
+	colorAccent = lipgloss.AdaptiveColor{Light: "#10B981", Dark: "#10B981"}
 	colorSubtle = lipgloss.AdaptiveColor{Light: "#666666", Dark: "#666666"}
 	colorDim    = lipgloss.AdaptiveColor{Light: "#999999", Dark: "#555555"}
 )
