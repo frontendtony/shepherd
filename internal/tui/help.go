@@ -24,6 +24,7 @@ func (m Model) renderHelp() string {
 				"Enter   Expand/collapse group",
 				"Tab     Switch panel focus",
 				"l       Focus log panel",
+				"f       Fullscreen logs",
 			},
 		},
 		{

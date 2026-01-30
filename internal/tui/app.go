@@ -48,6 +48,7 @@ type Model struct {
 	logViewport    viewport.Model
 	autoScroll     bool
 	showHelp       bool
+	fullScreenLogs bool
 	confirmQuit    bool
 	confirmStopAll bool
 	width, height  int

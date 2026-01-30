@@ -43,9 +43,9 @@ func (m Model) renderStatusBar() string {
 
 	var hints []string
 	if m.focusedPanel == PanelProcessList {
-		hints = append(hints, "↑/↓ navigate", "s start", "x stop", "r restart", "? help")
+		hints = append(hints, "↑/↓ navigate", "s start", "x stop", "r restart", "f logs", "? help")
 	} else {
-		hints = append(hints, "↑/↓ scroll", "tab back", "? help")
+		hints = append(hints, "↑/↓ scroll", "f fullscreen", "tab back", "? help")
 	}
 	right := strings.Join(hints, "  ") + " "
 

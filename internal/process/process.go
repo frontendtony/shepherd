@@ -55,14 +55,7 @@ func (p *ManagedProcess) Start() error {
 
 	p.state.Status = StatusStarting
 
-	cmd := exec.Command("sh", "-c", p.config.Command)
-	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
-
-	if p.config.WorkingDir != "" {
-		cmd.Dir = p.config.WorkingDir
-	}
-
-	cmd.Env = buildEnv(p.config.Env)
+	cmd := p.buildCmd()
 
 	// Try PTY first, fall back to pipes.
 	var reader io.Reader
@@ -74,6 +67,9 @@ func (p *ManagedProcess) Start() error {
 		reader = ptmx
 	} else {
 		// Fallback: use pipes for stdout/stderr.
+		// Create a fresh Cmd since pty.Start may have already called cmd.Start().
+		p.log.WriteString(fmt.Sprintf("[shepherd] PTY unavailable, using pipes: %s", err))
+		cmd = p.buildCmd()
 		p.ptmx = nil
 		var pr *io.PipeReader
 		pr, pipeWriter = io.Pipe()
@@ -86,6 +82,7 @@ func (p *ManagedProcess) Start() error {
 			pr.Close()
 			p.state.Status = StatusFailed
 			p.state.LastError = err.Error()
+			p.log.WriteString(fmt.Sprintf("[shepherd] Failed to start: %s", err))
 			return fmt.Errorf("starting process %s: %w", p.name, err)
 		}
 	}
@@ -231,6 +228,7 @@ func (p *ManagedProcess) waitForExit(pw *io.PipeWriter) {
 		} else {
 			p.state.Status = StatusFailed
 			p.state.LastError = err.Error()
+			p.log.WriteString(fmt.Sprintf("[shepherd] Process exited with error: %s", err))
 		}
 	} else {
 		p.state.ExitCode = 0
@@ -238,6 +236,16 @@ func (p *ManagedProcess) waitForExit(pw *io.PipeWriter) {
 	}
 
 	close(p.done)
+}
+
+func (p *ManagedProcess) buildCmd() *exec.Cmd {
+	cmd := exec.Command("sh", "-c", p.config.Command)
+	cmd.SysProcAttr = &syscall.SysProcAttr{Setpgid: true}
+	if p.config.WorkingDir != "" {
+		cmd.Dir = p.config.WorkingDir
+	}
+	cmd.Env = buildEnv(p.config.Env)
+	return cmd
 }
 
 func buildEnv(extra map[string]string) []string {

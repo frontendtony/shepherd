@@ -14,6 +14,10 @@ func (m Model) View() string {
 		return m.renderHelp()
 	}
 
+	if m.fullScreenLogs {
+		return m.renderFullScreenLogs()
+	}
+
 	leftWidth := m.listPanelWidth()
 	rightWidth := m.logPanelWidth()
 	panelHeight := m.height - 1
@@ -25,4 +29,29 @@ func (m Model) View() string {
 	status := m.renderStatusBar()
 
 	return lipgloss.JoinVertical(lipgloss.Left, panels, status)
+}
+
+func (m Model) renderFullScreenLogs() string {
+	header := "Logs"
+	if m.selectedProc != "" {
+		state := m.states[m.selectedProc]
+		header = "Logs: " + m.selectedProc + " [" + string(state.Status) + "]"
+	}
+
+	headerStyle := lipgloss.NewStyle().
+		Bold(true).
+		Foreground(colorAccent)
+
+	footer := lipgloss.NewStyle().
+		Foreground(colorDim).
+		Render("f close  ↑/↓ scroll  q quit")
+
+	contentHeight := m.height - 3 // header + footer + border spacing
+	content := m.logViewport.View()
+
+	return lipgloss.JoinVertical(lipgloss.Left,
+		headerStyle.Render(header),
+		lipgloss.NewStyle().Height(contentHeight).Render(content),
+		footer,
+	)
 }

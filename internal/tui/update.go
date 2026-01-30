@@ -21,8 +21,7 @@ func (m Model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 			m.logViewport = viewport.New(m.logPanelInnerWidth(), m.panelContentHeight())
 			m.ready = true
 		} else {
-			m.logViewport.Width = m.logPanelInnerWidth()
-			m.logViewport.Height = m.panelContentHeight()
+			m.resizeViewport()
 		}
 		m.updateLogContent()
 
@@ -100,6 +99,11 @@ func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
 		return nil
 	}
 
+	// Full-screen log view.
+	if m.fullScreenLogs {
+		return m.handleFullScreenKey(msg)
+	}
+
 	// Log panel focused.
 	if m.focusedPanel == PanelLogs {
 		return m.handleLogPanelKey(msg)
@@ -109,10 +113,29 @@ func (m *Model) handleKey(msg tea.KeyMsg) tea.Cmd {
 	return m.handleProcessListKey(msg)
 }
 
+func (m *Model) handleFullScreenKey(msg tea.KeyMsg) tea.Cmd {
+	switch {
+	case key.Matches(msg, keys.FullScreen) || msg.String() == "esc":
+		m.fullScreenLogs = false
+		m.resizeViewport()
+	case key.Matches(msg, keys.Quit):
+		return m.handleQuit()
+	default:
+		var cmd tea.Cmd
+		m.logViewport, cmd = m.logViewport.Update(msg)
+		m.autoScroll = m.logViewport.AtBottom()
+		return cmd
+	}
+	return nil
+}
+
 func (m *Model) handleLogPanelKey(msg tea.KeyMsg) tea.Cmd {
 	switch {
 	case key.Matches(msg, keys.Tab):
 		m.focusedPanel = PanelProcessList
+	case key.Matches(msg, keys.FullScreen):
+		m.fullScreenLogs = true
+		m.resizeViewport()
 	case key.Matches(msg, keys.Quit):
 		return m.handleQuit()
 	case key.Matches(msg, keys.Help):
@@ -181,6 +204,9 @@ func (m *Model) handleProcessListKey(msg tea.KeyMsg) tea.Cmd {
 		}
 	case key.Matches(msg, keys.Tab), key.Matches(msg, keys.Logs):
 		m.focusedPanel = PanelLogs
+	case key.Matches(msg, keys.FullScreen):
+		m.fullScreenLogs = true
+		m.resizeViewport()
 	}
 	return nil
 }
@@ -241,4 +267,15 @@ func (m Model) logPanelInnerWidth() int {
 
 func (m Model) panelContentHeight() int {
 	return m.height - 3
+}
+
+func (m *Model) resizeViewport() {
+	if m.fullScreenLogs {
+		m.logViewport.Width = m.width
+		m.logViewport.Height = m.height - 3
+	} else {
+		m.logViewport.Width = m.logPanelInnerWidth()
+		m.logViewport.Height = m.panelContentHeight()
+	}
+	m.updateLogContent()
 }
