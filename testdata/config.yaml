@@ -1,0 +1,50 @@
+version: 1
+
+stacks:
+  dev-stack:
+    description: "Full development environment"
+    groups: [tunnels, database]
+  minimal:
+    description: "Just tunnels"
+    groups: [tunnels]
+
+groups:
+  tunnels:
+    description: "SSH tunnels"
+    processes: [bastion, staging-forward]
+  database:
+    description: "Database connections"
+    processes: [db-tunnel]
+
+processes:
+  bastion:
+    description: "Main bastion SSH connection"
+    command: "echo bastion-running && sleep 3600"
+    retry:
+      enabled: true
+      max_attempts: 5
+      initial_backoff: 2s
+      max_backoff: 60s
+      backoff_multiplier: 2
+
+  staging-forward:
+    description: "Port forward to staging"
+    command: "echo staging-forward-running && sleep 3600"
+    depends_on: [bastion]
+    retry:
+      enabled: true
+      max_attempts: 3
+      initial_backoff: 5s
+      max_backoff: 30s
+      backoff_multiplier: 2
+
+  db-tunnel:
+    description: "Database tunnel through bastion"
+    command: "echo db-tunnel-running && sleep 3600"
+    depends_on: [bastion]
+    retry:
+      enabled: true
+      max_attempts: 3
+      initial_backoff: 2s
+      max_backoff: 30s
+      backoff_multiplier: 2
