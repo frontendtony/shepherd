@@ -33,8 +33,7 @@ changelog:
       - "^test:"
 
 brews:
-  - name: herder
-    repository:
+  - repository:
       owner: frontendtony
       name: homebrew-tap
       token: "{{ .Env.HOMEBREW_TAP_TOKEN }}"

@@ -17,8 +17,7 @@ A TUI process orchestrator for development environments. Shepherd manages long-r
 ### Homebrew (macOS/Linux)
 
 ```bash
-brew tap frontendtony/tap
-brew install herder
+brew install frontendtony/tap/shepherd
 ```
 
 ### Download binary
