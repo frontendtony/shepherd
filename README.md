@@ -14,6 +14,16 @@ A TUI process orchestrator for development environments. Shepherd manages long-r
 
 ## Installation
 
+### Homebrew (macOS/Linux)
+
+```bash
+brew install frontendtony/tap/shepherd
+```
+
+### Download binary
+
+Grab a pre-built binary from the [releases page](https://github.com/frontendtony/shepherd/releases).
+
 ### From source
 
 Requires Go 1.21+.
